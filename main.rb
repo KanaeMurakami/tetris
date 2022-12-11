@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# メイン
 class Main
   def game_start
     # TODO
