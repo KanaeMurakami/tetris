@@ -3,3 +3,6 @@ AllCops:
   Exclude:
     - "Gemfile"
   TargetRubyVersion: 3.0
+
+Metrics/MethodLength:
+  Max: 20
