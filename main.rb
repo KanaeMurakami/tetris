@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'io/console'
+require 'curses'
 
 # 落下ブロック
 class Block
@@ -71,6 +71,8 @@ class Main
     [1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
   ].freeze
+  FPS = 1 # 1秒あたりの描画頻度
+  INTERVAL = 1 / FPS # 描画間隔(秒)
 
   attr_accessor :field, :screen, :block
 
@@ -83,21 +85,36 @@ class Main
   end
 
   def game_start
-    # TODO
-    loop do
-      key = $stdin.getch
-      # command + c で終了
-      exit if key == ?\C-c
+    last_time = Time.now
 
-      case key
-      when 's'
-        block.y = block.y + 1 # ブロックを下に移動
-      when 'a'
-        block.x = block.x - 1 # ブロックを左に移動
-      when 'd'
-        block.x = block.x + 1 # ブロックを右に移動
-      else
-        rotate_block
+    Curses.timeout = 0
+    Curses.noecho
+    Curses.curs_set(0)
+
+    loop do
+      new_time = Time.now
+      # 待機時間が経過したら、落下ブロックを落下させる
+      if new_time >= last_time + INTERVAL
+        last_time = new_time
+        fall_block
+      end
+
+      key = Curses.getch
+
+      if key
+        # command + c で終了
+        exit if key == ?\C-c
+
+        case key
+        when 's'
+          block.y = block.y + 1 # ブロックを下に移動
+        when 'a'
+          block.x = block.x - 1 # ブロックを左に移動
+        when 'd'
+          block.x = block.x + 1 # ブロックを右に移動
+        else
+          rotate_block
+        end
       end
 
       system 'clear'
@@ -150,6 +167,11 @@ class Main
     end
 
     self.block = rotated_block
+  end
+
+  def fall_block
+    block.y = block.y + 1
+    draw_screen
   end
 end
 
