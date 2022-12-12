@@ -1,5 +1,45 @@
 # frozen_string_literal: true
 
+# 落下ブロック
+class Block
+  # ブロックI型
+  BLOCK_SHAPE_I = [
+    [0, 1, 0, 0],
+    [0, 1, 0, 0],
+    [0, 1, 0, 0],
+    [0, 0, 0, 0]
+  ].freeze
+  # ブロックL型
+  BLOCK_SHAPE_L = [
+    [0, 1, 0, 0],
+    [0, 1, 1, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0]
+  ].freeze
+  # BLOCK_SHAPE_MAX = # 落下ブロックの種類の数
+  BLOCK_WIDTH_MAX = 4 # 落下ブロックの最大幅
+  BLOCK_HEIGHT_MAX = 4 # 落下ブロックの最大高さ
+  # 落下ブロックの形状
+  BLOCK_SHAPES = [
+    {
+      size: 3,
+      pattern: BLOCK_SHAPE_I
+    },
+    {
+      size: 3,
+      pattern: BLOCK_SHAPE_L
+    }
+  ].freeze
+
+  attr_accessor :shape, :x, :y
+
+  def initialize(field_width)
+    self.shape = BLOCK_SHAPES.sample
+    self.x = (field_width / 2) - (shape.size / 2)
+    self.y = 0
+  end
+end
+
 # メイン
 class Main
   FIELD_WIDTH = 12
@@ -8,7 +48,7 @@ class Main
   BLOCK_NONE = 0 # ブロックなし
   BLOCK_HARD = 1 # 消せないブロック
   # BLOCK_MAX = # ブロックの種類の数
-
+  BLOCK_FALL = 2 # 落下ブロック
   DEFAULT_FIELD = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -30,10 +70,12 @@ class Main
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
   ].freeze
 
-  attr_accessor :field, :screen
+  attr_accessor :field, :screen, :block
 
   def initialize
     self.field = DEFAULT_FIELD.dup
+
+    init_block
 
     draw_screen
   end
@@ -47,8 +89,21 @@ class Main
 
   private
 
+  # 落下ブロックの初期化
+  def init_block
+    self.block = Block.new(FIELD_WIDTH)
+  end
+
   def draw_screen
     screen = field.dup
+
+    Block::BLOCK_HEIGHT_MAX.times do |y|
+      Block::BLOCK_WIDTH_MAX.times do |x|
+        next if block.shape[:pattern][y][x].zero?
+
+        screen[block.y + y][block.x + x] = BLOCK_FALL
+      end
+    end
 
     FIELD_HIGHT.times do |y|
       FIELD_WIDTH.times do |x|
@@ -57,6 +112,8 @@ class Main
           print '　'
         when BLOCK_HARD
           print '＋'
+        when BLOCK_FALL
+          print '⚪︎'
         end
       end
       print "\n"

@@ -4,5 +4,8 @@ AllCops:
     - "Gemfile"
   TargetRubyVersion: 3.0
 
+Metrics/AbcSize:
+  Max: 30
+
 Metrics/MethodLength:
   Max: 20
