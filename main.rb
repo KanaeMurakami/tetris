@@ -105,6 +105,9 @@ class Main
         # command + c で終了
         exit if key == ?\C-c
 
+        last_block = Marshal.load(Marshal.dump(block))
+        draw_screen
+
         case key
         when 's'
           block.y = block.y + 1 # ブロックを下に移動
@@ -115,9 +118,14 @@ class Main
         else
           rotate_block
         end
+
+        if intersect?
+          self.block = last_block
+        else
+          draw_screen
+        end
       end
 
-      system 'clear'
       draw_screen
       sleep 0.1
     end
@@ -131,6 +139,8 @@ class Main
   end
 
   def draw_screen
+    system 'clear'
+
     # 深いコピー
     screen = Marshal.load(Marshal.dump(field))
 
@@ -170,8 +180,31 @@ class Main
   end
 
   def fall_block
+    last_block = Marshal.load(Marshal.dump(block))
     block.y = block.y + 1
+
+    self.block = last_block if intersect?
+
     draw_screen
+  end
+
+  def intersect?
+    block.shape[:size].times do |y|
+      block.shape[:size].times do |x|
+        # 対象のマスにブロックがあるかどうか
+        next if block.shape[:pattern][y][x].zero?
+
+        screen_x = block.x + x
+        screen_y = block.y + y
+        if screen_x >= 0 && screen_x < FIELD_WIDTH && screen_y >= 0 && screen_y < FIELD_HIGHT && field[screen_y][screen_x] == BLOCK_NONE
+          next
+        end
+
+        return true
+      end
+    end
+
+    false
   end
 end
 
