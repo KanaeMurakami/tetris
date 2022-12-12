@@ -51,6 +51,7 @@ class Main
   BLOCK_HARD = 1 # 消せないブロック
   # BLOCK_MAX = # ブロックの種類の数
   BLOCK_FALL = 2 # 落下ブロック
+  BLOCK_SOFT = 3 # 消せるブロック
   DEFAULT_FIELD = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -77,7 +78,7 @@ class Main
   attr_accessor :field, :screen, :block
 
   def initialize
-    self.field = DEFAULT_FIELD
+    self.field = Marshal.load(Marshal.dump(DEFAULT_FIELD))
 
     init_block
 
@@ -121,6 +122,18 @@ class Main
 
         if intersect?
           self.block = last_block
+
+          Block::BLOCK_HEIGHT_MAX.times do |y|
+            Block::BLOCK_WIDTH_MAX.times do |x|
+              next if block.shape[:pattern][y][x].zero?
+
+              field[block.y + y][block.x + x] = BLOCK_SOFT
+            end
+          end
+
+          init_block
+
+          initialize if intersect?
         else
           draw_screen
         end
@@ -159,6 +172,8 @@ class Main
           print '　'
         when BLOCK_HARD
           print '＋'
+        when BLOCK_SOFT
+          print '・'
         when BLOCK_FALL
           print '⚪︎'
         end
@@ -183,7 +198,21 @@ class Main
     last_block = Marshal.load(Marshal.dump(block))
     block.y = block.y + 1
 
-    self.block = last_block if intersect?
+    if intersect?
+      self.block = last_block
+
+      Block::BLOCK_HEIGHT_MAX.times do |y|
+        Block::BLOCK_WIDTH_MAX.times do |x|
+          next if block.shape[:pattern][y][x].zero?
+
+          field[block.y + y][block.x + x] = BLOCK_SOFT
+        end
+      end
+
+      init_block
+
+      initialize if intersect?
+    end
 
     draw_screen
   end
