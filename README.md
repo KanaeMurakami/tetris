@@ -4,4 +4,4 @@
 
 - コンソールで下記を実行
 
-`ruby main.rb`
+`bundle exec ruby main.rb`
