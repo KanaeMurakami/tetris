@@ -96,6 +96,8 @@ class Main
         block.x = block.x - 1 # ブロックを左に移動
       when 'd'
         block.x = block.x + 1 # ブロックを右に移動
+      else
+        rotate_block
       end
 
       system 'clear'
@@ -136,6 +138,18 @@ class Main
       end
       print "\n"
     end
+  end
+
+  def rotate_block
+    rotated_block = Marshal.load(Marshal.dump(block))
+
+    block.shape[:size].times do |y|
+      block.shape[:size].times do |x|
+        rotated_block.shape[:pattern][block.shape[:size] - 1 - x][y] = block.shape[:pattern][y][x]
+      end
+    end
+
+    self.block = rotated_block
   end
 end
 
