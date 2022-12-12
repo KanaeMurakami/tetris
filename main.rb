@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'io/console'
+
 # 落下ブロック
 class Block
   # ブロックI型
@@ -73,7 +75,7 @@ class Main
   attr_accessor :field, :screen, :block
 
   def initialize
-    self.field = DEFAULT_FIELD.dup
+    self.field = DEFAULT_FIELD
 
     init_block
 
@@ -83,7 +85,22 @@ class Main
   def game_start
     # TODO
     loop do
-      sleep 1
+      key = $stdin.getch
+      # command + c で終了
+      exit if key == ?\C-c
+
+      case key
+      when 's'
+        block.y = block.y + 1 # ブロックを下に移動
+      when 'a'
+        block.x = block.x - 1 # ブロックを左に移動
+      when 'd'
+        block.x = block.x + 1 # ブロックを右に移動
+      end
+
+      system 'clear'
+      draw_screen
+      sleep 0.1
     end
   end
 
@@ -95,7 +112,8 @@ class Main
   end
 
   def draw_screen
-    screen = field.dup
+    # 深いコピー
+    screen = Marshal.load(Marshal.dump(field))
 
     Block::BLOCK_HEIGHT_MAX.times do |y|
       Block::BLOCK_WIDTH_MAX.times do |x|
