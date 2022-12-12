@@ -131,6 +131,8 @@ class Main
             end
           end
 
+          erase_line
+
           init_block
 
           initialize if intersect?
@@ -209,6 +211,8 @@ class Main
         end
       end
 
+      erase_line
+
       init_block
 
       initialize if intersect?
@@ -234,6 +238,42 @@ class Main
     end
 
     false
+  end
+
+  def erase_line
+    FIELD_HIGHT.times do |y|
+      completed = true
+
+      FIELD_WIDTH.times do |x|
+        if field[y][x] == BLOCK_NONE
+          completed = false
+          break
+        end
+      end
+
+      next unless completed
+
+      FIELD_WIDTH.times do |x|
+        field[y][x] = BLOCK_NONE if field[y][x] == BLOCK_SOFT
+      end
+
+      FIELD_WIDTH.times do |x|
+        # 消えた行から先頭の行まで反復
+        (0..y).to_a.reverse.each do |y2|
+          break if field[y2][x] == BLOCK_HARD
+
+          # 先頭の行かどうか
+          if y2.zero?
+            field[y2][x] = BLOCK_NONE
+          else
+            next if field[y2 - 1][x] == BLOCK_HARD
+
+            # 上のマスを下のマスにコピーする
+            field[y2][x] = field[y2 - 1][x]
+          end
+        end
+      end
+    end
   end
 end
 
