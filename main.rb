@@ -73,7 +73,7 @@ class Main
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
   ].freeze
   FPS = 1 # 1秒あたりの描画頻度
-  INTERVAL = 1 / FPS # 描画間隔(秒)
+  INTERVAL = 1.2 / FPS # 描画間隔(秒)
 
   attr_accessor :field, :screen, :block
 
